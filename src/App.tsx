@@ -1,76 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { bindActionCreators } from "redux";
 import "./App.css";
-import {InputField} from "./components/InputField";
-import TodoList from "./components/TodoList";
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
-import { Todo } from "./model/model";
+import { actionCreators, State } from "./state";
+
 
 const App: React.FC = () => {
-  const [todo, setTodo] = useState<string>("");
-  const [todos, setTodos] = useState<Array<Todo>>([]);
-  const [CompletedTodos, setCompletedTodos] = useState<Array<Todo>>([]);
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (todo) {
-      setTodos([...todos, { id: Date.now(), todo, isDone: false }]);
-      setTodo("");
-    }
-  };
-
-  const onDragEnd = (result: DropResult) => {
-    const { destination, source } = result;
-
-    console.log(result);
-
-    if (!destination) {
-      return;
-    }
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    let add;
-    let active = todos;
-    let complete = CompletedTodos;
-    // Source Logic
-    if (source.droppableId === "TodosList") {
-      add = active[source.index];
-      active.splice(source.index, 1);
-    } else {
-      add = complete[source.index];
-      complete.splice(source.index, 1);
-    }
-
-    // Destination Logic
-    if (destination.droppableId === "TodosList") {
-      active.splice(destination.index, 0, add);
-    } else {
-      complete.splice(destination.index, 0, add);
-    }
-
-    setCompletedTodos(complete);
-    setTodos(active);
-  };
-
+  const dispatch = useDispatch();
+  const { depositMoney, withdrawMoney, bankrupt } = bindActionCreators(actionCreators, dispatch);
+  const data:any=useSelector((state:State)=>state.bank)
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="App">
-        <span className="heading">Taskify</span>
-        <InputField todo={todo} setTodo={setTodo} handleAdd={handleAdd} />
-        <TodoList
-          todos={todos}
-          setTodos={setTodos}
-          CompletedTodos={CompletedTodos}
-          setCompletedTodos={setCompletedTodos}
-        />
-      </div>
-    </DragDropContext>
+    <>
+      <h1>{data.amount}</h1>
+      <button onClick={()=>depositMoney(1000)}>Deposit</button>
+      <button  onClick={()=>withdrawMoney(1000)}>Withdraw</button>
+      <button onClick={() => bankrupt()}>Bankrupt</button>
+    </>
   );
 };
 
